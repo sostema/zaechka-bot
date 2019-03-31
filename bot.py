@@ -34,13 +34,13 @@ else:
 
 
 def init_messages():
-    with open('random_good_replies') as f:
+    with open('random_good_replies.txt') as f:
         random_good_replies = f.read().split('; ')
 
-    with open('trigger_words') as f:
+    with open('trigger_words.txt') as f:
         trigger_words = f.read().split('; ')
 
-    with open('trigger_replies') as f:
+    with open('trigger_replies.txt') as f:
         trigger_replies = f.read().split('; ')
 
 
@@ -84,7 +84,7 @@ def restart(update, context):
 if __name__ == '__main__':
     logger.info("Starting bot")
     init_messages()
-    updater = Updater(TOKEN)
+    updater = Updater(TOKEN, use_context=True)
 
     dp.add_handler(CommandHandler('r', restart, filters=Filters.user(username='@real_sostema')))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome_handler))
