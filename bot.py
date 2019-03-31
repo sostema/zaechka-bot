@@ -2,8 +2,9 @@ import logging
 import os
 import random
 import sys
+from threading import Thread
 
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -86,8 +87,12 @@ if __name__ == '__main__':
     init_messages()
     updater = Updater(TOKEN, use_context=True)
 
-    dp.add_handler(CommandHandler('r', restart, filters=Filters.user(username='@real_sostema')))
+    dp = updater.dispatcher
+
+    dp.add_handler(CommandHandler('restart', restart, filters=Filters.user(username='@real_sostema')))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome_handler))
     dp.add_handler(MessageHandler((Filters.all & (~ Filters.status_update)), trigger_replies))
 
     run(updater)
+
+    updater.idle()
