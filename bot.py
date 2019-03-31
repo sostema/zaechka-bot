@@ -21,6 +21,7 @@ trigger_replies = []
 if mode == "dev":
     def run(updater):
         updater.start_polling()
+        updater.idle()
 elif mode == "prod":
     def run(updater):
         PORT = int(os.environ.get("PORT", "8443"))
@@ -35,14 +36,17 @@ else:
 
 
 def init_messages():
-    with open('random_good_replies.txt') as f:
-        random_good_replies = f.read().split('; ')
+    global random_good_replies
+    global trigger_words
+    global trigger_replies
+    with open('random_good_replies.txt', encoding='utf-8') as f:
+        random_good_replies = f.read().split('; ')[0:-1]
 
-    with open('trigger_words.txt') as f:
-        trigger_words = f.read().split('; ')
+    with open('trigger_words.txt', encoding='utf-8') as f:
+        trigger_words = f.read().split('; ')[0:-1]
 
-    with open('trigger_replies.txt') as f:
-        trigger_replies = f.read().split('; ')
+    with open('trigger_replies.txt', encoding='utf-8') as f:
+        trigger_replies = f.read().split('; ')[0:-1]
 
 
 def trigger_reply(update, context):
@@ -51,6 +55,9 @@ def trigger_reply(update, context):
     else:
         good_reply(update, context)
 
+def error(update, context):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def good_reply(update, context):
     """Good replies for my beloved"""
@@ -75,15 +82,18 @@ def stop_and_kill():
     """Gracefully stop the Updater and replace the current process with a new one"""
     updater.stop()
     sys.exit(1)
-								 
+
+
 def stop_and_restart():
     """Gracefully stop the Updater and replace the current process with a new one"""
     updater.stop()
     os.execl(sys.executable, sys.executable, *sys.argv)
 
-def stop():
-	update.message.reply_text('Bot is dying...')
-	Thread(target=stop_and_kill).start()
+
+def stop(update, context):
+    update.message.reply_text('Bot is dying...')
+    Thread(target=stop_and_kill).start()
+
 
 def restart(update, context):
     update.message.reply_text('Bot is restarting...')
@@ -97,11 +107,12 @@ if __name__ == '__main__':
 
     dp = updater.dispatcher
 
+
     dp.add_handler(CommandHandler('restart', restart, filters=Filters.user(username='@real_sostema')))
-	dp.add_handler(CommandHandler('kill', stop, filters=Filters.user(username='@real_sostema')))
+    dp.add_handler(CommandHandler('kill', stop, filters=Filters.user(username='@real_sostema')))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome_handler))
-    dp.add_handler(MessageHandler((Filters.all & (~ Filters.status_update)), trigger_replies))
+    dp.add_handler(MessageHandler((Filters.all & (~ Filters.status_update)), trigger_reply))
+
+    dp.add_error_handler(error)
 
     run(updater)
-
-    updater.idle()
