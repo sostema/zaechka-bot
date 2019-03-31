@@ -1,1 +1,0 @@
-.\zbott_env\python.exe .\Source\zaechka_bot.py
