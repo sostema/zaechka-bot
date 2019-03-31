@@ -71,11 +71,19 @@ def welcome_handler(update, context):
                                  parse_mode='HTML')
 
 
+def stop_and_kill():
+    """Gracefully stop the Updater and replace the current process with a new one"""
+    updater.stop()
+    sys.exit(1)
+								 
 def stop_and_restart():
     """Gracefully stop the Updater and replace the current process with a new one"""
     updater.stop()
     os.execl(sys.executable, sys.executable, *sys.argv)
 
+def stop():
+	update.message.reply_text('Bot is dying...')
+	Thread(target=stop_and_kill).start()
 
 def restart(update, context):
     update.message.reply_text('Bot is restarting...')
@@ -90,6 +98,7 @@ if __name__ == '__main__':
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('restart', restart, filters=Filters.user(username='@real_sostema')))
+	dp.add_handler(CommandHandler('kill', stop, filters=Filters.user(username='@real_sostema')))
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome_handler))
     dp.add_handler(MessageHandler((Filters.all & (~ Filters.status_update)), trigger_replies))
 
