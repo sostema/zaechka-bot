@@ -12,7 +12,7 @@ logger = logging.getLogger()
 
 mode = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
-freq = os.getenv("FREQ")
+freq = int(os.getenv("FREQ"))
 
 random_good_replies = []
 trigger_words = []
@@ -29,7 +29,8 @@ elif mode == "prod":
         updater.start_webhook(listen="0.0.0.0",
                               port=PORT,
                               url_path=TOKEN)
-        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, TOKEN))
+        updater.bot.set_webhook("https://" + HEROKU_APP_NAME + ".herokuapp.com/" + TOKEN)
+		updater.idle()
 else:
     logger.error("No MODE specified!")
     sys.exit(1)
