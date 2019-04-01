@@ -29,11 +29,11 @@ elif mode == "prod":
         updater.start_webhook(listen="0.0.0.0",
                               port=PORT,
                               url_path=TOKEN)
-        updater.bot.set_webhook("https://" + HEROKU_APP_NAME + ".herokuapp.com/" + TOKEN)
-		updater.idle()
+        updater.bot.set_webhook("https://{}.herokuapp.com/{}".format(HEROKU_APP_NAME, TOKEN))
+        updater.idle()
 else:
     logger.error("No MODE specified!")
-    sys.exit(1)
+    sys.exit(2)
 
 
 def init_messages():
@@ -56,9 +56,11 @@ def trigger_reply(update, context):
     else:
         good_reply(update, context)
 
+
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
 
 def good_reply(update, context):
     """Good replies for my beloved"""
@@ -107,7 +109,6 @@ if __name__ == '__main__':
     updater = Updater(TOKEN, use_context=True)
 
     dp = updater.dispatcher
-
 
     dp.add_handler(CommandHandler('restart', restart, filters=Filters.user(username='@real_sostema')))
     dp.add_handler(CommandHandler('kill', stop, filters=Filters.user(username='@real_sostema')))
